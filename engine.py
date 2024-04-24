@@ -2,65 +2,60 @@ import sys
 import random
 import time
 
-# current board state
-board = [[' ',' ',' '],
-        [' ',' ',' '],
-        [' ',' ',' ']]
+class board():
+    def __init__(self):
+        self.current = [[' ',' ',' '],
+                        [' ',' ',' '],
+                        [' ',' ',' ']]
+        self.lastWin = None
+    def clear_board(self):
+        self.current = [[' ',' ',' '],
+                        [' ',' ',' '],
+                        [' ',' ',' ']]
+    # vars to distinguish vertical, horizontal, and diagonal win conditions
+    def verticals(self):
+        vert = [[self.current[0][0],self.current[1][0],self.current[2][0]],
+                [self.current[0][1],self.current[1][1],self.current[2][1]],
+                [self.current[0][2],self.current[1][2],self.current[2][2]]]
+        return vert
+    def horizontals(self):
+        horiz = [[self.current[0][0],self.current[0][1],self.current[0][2]],
+                [self.current[1][0],self.current[1][1],self.current[1][2]],
+                [self.current[2][0],self.current[2][1],self.current[2][2]]]
+        return horiz
+    def diagonals(self):
+        diag = [[self.current[0][0],self.current[1][1],self.current[2][2]],
+                [self.current[0][2],self.current[1][1],self.current[2][0]]]
+        return diag
+    # draw current game board
+    def draw_board(self):
+        print('\n')
+        for idx, row in enumerate(self.current):
+            print('|'.join(row))
+            if idx != 2:
+                print('-' * 5)
+        print('\n')
+    # get an array of valid coordinates for the current board state
+    def open_slots(self):
+        slots = []
+        for i in range(len(self.current)):
+            for j in range(len(self.current[i])):
+                if self.current[i][j] == ' ':
+                    slots.append(tuple([i,j]))
+        return slots
 
-def clear_board():
-    global board
-    board = [[' ',' ',' '],
-            [' ',' ',' '],
-            [' ',' ',' ']]
-
-lastWin = None
-
-# vars to distinguish vertical, horizontal, and diagonal win conditions
-def verticals():
-    vert = [[board[0][0],board[1][0],board[2][0]],
-            [board[0][1],board[1][1],board[2][1]],
-            [board[0][2],board[1][2],board[2][2]]]
-    return vert
-def horizontals():
-    horiz = [[board[0][0],board[0][1],board[0][2]],
-            [board[1][0],board[1][1],board[1][2]],
-            [board[2][0],board[2][1],board[2][2]]]
-    return horiz
-def diagonals():
-    diag = [[board[0][0],board[1][1],board[2][2]],
-            [board[0][2],board[1][1],board[2][0]]]
-    return diag
-
-# draw current game board
-def draw_board():
-    print('\n')
-    for idx, row in enumerate(board):
-        print('|'.join(row))
-        if idx != 2:
-            print('-' * 5)
-    print('\n')
-
-# get an array of valid coordinates for the current board state
-def open_slots():
-    slots = []
-    for i in range(len(board)):
-        for j in range(len(board[i])):
-            if board[i][j] == ' ':
-                slots.append(tuple([i,j]))
-    return slots
-
+board = board()
 
 # get input from user (coordinates in x,y format) and update game board
 def user_move():
-    global board
     errorMessage = 'Please enter numeric integers 0-2 in the format \"x,y".'
-    valid = open_slots()
+    valid = board.open_slots()
     s = input('Type valid coorindates for your move: ')
     try:
         coords = tuple(int(x) for x in s.split(","))
         if coords in valid:
-            board[coords[0]][coords[1]] = 'x'
-            draw_board()
+            board.current[coords[0]][coords[1]] = 'x'
+            board.draw_board()
         else:
             print(errorMessage)
             user_move()
@@ -72,10 +67,10 @@ def user_move():
 # comp will choose a win over a block
 # if no win or block open, it chooses a random available slot
 def comp_read():
-    vert = verticals()
-    horiz = horizontals()
-    diag = diagonals()
-    valid = open_slots()
+    vert = board.verticals()
+    horiz = board.horizontals()
+    diag = board.diagonals()
+    valid = board.open_slots()
     choice = (-1,-1)
     win = (-1,-1)
     block = (-1,-1)
@@ -141,22 +136,21 @@ def comp_read():
         return None
 
 def comp_move():
-    global board
-    valid = open_slots()
+    valid = board.open_slots()
     move = comp_read()
     if move is not None and move in valid:
         coords = move
     else:
         coords = random.choice(valid)
-    board[coords[0]][coords[1]] = 'o'
+    board.current[coords[0]][coords[1]] = 'o'
     print('Computer move: ')
-    draw_board()
+    board.draw_board()
 
 # check for vertical, horizontal, or diagonal wins
 def check_win():
-    vert = verticals()
-    horiz = horizontals()
-    diag = diagonals()
+    vert = board.verticals()
+    horiz = board.horizontals()
+    diag = board.diagonals()
     for i in range(len(vert)):
         if vert[i][0] != ' ' and vert[i].count(vert[i][0]) == len(vert[i]):
             return vert[i][0]
@@ -174,23 +168,23 @@ def play_game():
     global lastWin
     # initialize game
     print('Beginning board:')
-    clear_board()
-    draw_board()
-    while open_slots() and not check_win():
-        if lastWin == 'o' or lastWin == None:
-            if not check_win() and open_slots():
+    board.clear_board()
+    board.draw_board()
+    while board.open_slots() and not check_win():
+        if board.lastWin == 'o' or board.lastWin == None:
+            if not check_win() and board.open_slots():
                 user_move()
-            if not check_win() and open_slots():
+            if not check_win() and board.open_slots():
                 time.sleep(2)
                 comp_move()
         else:
-            if not check_win() and open_slots():
+            if not check_win() and board.open_slots():
                 time.sleep(2)
                 comp_move()
-            if not check_win() and open_slots():
+            if not check_win() and board.open_slots():
                 user_move()
     winner = check_win()
-    if winner or not open_slots():
+    if winner or not board.open_slots():
         if winner:
             print('{} wins!'.format(winner))
         else:
@@ -199,7 +193,7 @@ def play_game():
         while s != 'y' or s != 'n':
             s = input('Play again? (Y/N): ')
             if s.lower() == 'y':
-                lastWin = winner
+                board.lastWin = winner
                 play_game()
             elif s.lower() == 'n':
                 quit()
