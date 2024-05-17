@@ -1,8 +1,7 @@
-import sys
 import random
 import time
 
-class board():
+class Board:
     def __init__(self):
         self.current = [[' ',' ',' '],
                         [' ',' ',' '],
@@ -44,7 +43,7 @@ class board():
                     slots.append(tuple([i,j]))
         return slots
 
-board = board()
+board = Board()
 
 # get input from user (coordinates in x,y format) and update game board
 def user_move():
@@ -198,8 +197,5 @@ def play_game():
             elif s.lower() == 'n':
                 quit()
 
-play_game()
-
-# program computer to be more aggressive in pursuing win/picking strategic spaces?
-# option to pick x or o for user. Must change computer logic to reflexively pick x or o based on user's choice
-# convert this to a class - create GUI with pygame in seperate file
+if __name__ == '__main__':
+    play_game()
